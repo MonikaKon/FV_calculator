@@ -82,3 +82,4 @@ r2.grid(row =2, column = 0, sticky = "E")
 root.mainloop()
 
 
+
