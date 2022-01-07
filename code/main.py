@@ -1,9 +1,50 @@
 from tkinter import *
 
+
+#zdefiniowanie funkcji przycisków
+
+#zdefiniowanie obliczeń
+def calculate():
+    try:                        #obsługa błędów
+        PV = float(e_PV.get())
+        a = float(e_a.get())
+        i = float(e_i.get())/100
+        n = float(e_n.get())
+
+        if typ.get() == 0:          #na koniec okresu
+                wynik = a * (((1+i)**n) - 1)/i + PV*((1+i)**n)
+        else:                         #z góry/ na początek okresu
+                wynik = a * (1+i)*((1+i)**n-1)/i + PV*((1+i)**(n))
+
+        wynik = round(wynik, 2)
+        e_FV.delete(0, END)
+        e_FV.insert(0, str(wynik))
+
+    except ZeroDivisionError: #stworzenie wyjąków
+        e_FV.delete(0, END)
+        e_FV.insert(0, "i nie może się równać 0")
+    except ValueError:
+        e_FV.delete(0, END)
+        e_FV.insert(0, "podaj liczby")
+
+
+#wyczyszczenie pól
+def clear():
+    for _ in [e_PV, e_a, e_i, e_n, e_FV]:
+        _.delete(0, END)
+    r2.select()
+
+#zdefiniowanie kopiowania do schowka
+def copyFV():
+    a1 = e_FV.get()
+    root.clipboard_clear()
+    root.clipboard_append(a1)
+    root.update()
+
 #stworzenie okna
 root = Tk()
 root.title("Obliczenie wartości przyszłej kapitału FV")
-root.geometry("475x215")
+root.geometry("550x215")
 
 #stworzenie zmiennej typu kapitalizacji i fontu
 typ = IntVar()
@@ -23,9 +64,9 @@ l_i1 = Label(root, text = "i", font = font)
 l_n1 = Label(root, text = "n", font = font)
 
 l_PV2 = Label(root, text =" - wartość początkowa", font = font)
-l_a2 = Label(root, text = " - wpłacona rata na koniec okresu", font = font)
+l_a2 = Label(root, text = " - wpłacana rata", font = font)
 l_i2 = Label(root, text = " - oprocentowanie dla okresu [%]", font = font)
-l_n2 = Label(root, text = " - liczba okresów kapitalizacji", font = font)
+l_n2 = Label(root, text = " - liczba wszystkich okresów płaności", font = font)
 
 
 #frame na FV + FV
@@ -35,15 +76,16 @@ e_FV = Entry(f1, font = font)
 
 #frame na przyciski + przyciski
 f2 = Frame(root)
-b1 = Button(f2, text = "Oblicz", padx = 5, pady = 5, width = 10, font = font)
-b2 = Button(f2, text = "Wyczyść", padx = 5, pady = 5, width = 10, font = font)
-b3 = Button(f2, text = "Kopiuj Wynik", padx = 5, pady = 5, width = 10, font = font)
+b1 = Button(f2, text = "Oblicz", padx = 5, pady = 5, width = 10, font = font, command = calculate)
+b2 = Button(f2, text = "Wyczyść", padx = 5, pady = 5, width = 10, font = font, command = clear)
+b3 = Button(f2, text = "Kopiuj Wynik", padx = 5, pady = 5, width = 10, font = font, command = copyFV)
 
 #frame na radiobuttony
 f3 = Frame(root)
-l3 = Label(f3, text = "Typ kapitalizacji:", font = font)
-r1 = Radiobutton(f3, text = "z dołu", variable = typ, value = 0, font = font)
-r2 = Radiobutton(f3, text = "z góry", variable = typ, value = 1, font = font)
+l3 = Label(f3, text = "Rata wpłacana:", font = font)
+r1 = Radiobutton(f3, text = "na koniec okresu", variable = typ, value = 0, font = font)
+r2 = Radiobutton(f3, text = "na początek okresu", variable = typ, value = 1, font = font)
+r2.select() #domyślnie wybierz na początek okresu
 
 #zapakowanie
 l2.grid(row = 1, column = 0, columnspan = 3, sticky = "W", padx = 5, pady = 2)
@@ -75,8 +117,8 @@ f2.grid(row = 7, column = 0, columnspan = 4)
 #zapakowanie radiobuttonów
 f3.grid(row = 1, column =  3, rowspan = 4, sticky = N, padx = 20, pady = 3)
 l3.grid(row = 0, column = 0, sticky = "W")
-r1.grid(row = 1, column = 0, sticky = "E")
-r2.grid(row =2, column = 0, sticky = "E")
+r1.grid(row = 2, column = 0, sticky = "W")
+r2.grid(row =1, column = 0, sticky = "W")
 
 #główna pętla
 root.mainloop()
